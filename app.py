@@ -20,10 +20,20 @@ def get_gemini_response(question,prompt):
 
 # Function To retrieve query results from the database
 def read_sql_query(sql, db_config):
-    conn = mysql.connector.connect(**db_config)
-    result_df = pd.read_sql(sql, conn)  # Use pandas to read SQL results into a DataFrame
-    conn.close()
-    return result_df
+    try:
+        conn = mysql.connector.connect(**db_config)
+        # Check if the response contains "Wrong Input" before attempting to execute
+        if "Wrong Input" in sql:
+            raise ValueError("Wrong Input: The input provided is not understood. Please enter a valid question.")
+
+        result_df = pd.read_sql(sql, conn)  # Use pandas to read SQL results into a DataFrame
+        conn.close()
+        return result_df
+    except mysql.connector.Error as err:
+        st.error(f"DatabaseError: {err}")
+
+    except ValueError as verr:
+        st.error(f"ValueError: {verr}")
 
 ## Defining the Prompt
 prompt=[
@@ -47,7 +57,7 @@ prompt=[
 ## Streamlit App
 
 st.set_page_config(page_title="Retrieval of Any SQL query")
-st.header("Retrieval of SQL Data")
+st.header("Retrieval of SQL Query and Data")
 
 question=st.text_input("Input: ",key="input")
 
@@ -58,20 +68,21 @@ if submit:
     response=get_gemini_response(question,prompt)
     print(response)
 
-    # Check if the response is relevant to fetching data
-    if "SQL" not in response or "```" in response:
-        st.error("Not relevant or not related to the topic.")
-    else:
-        # Define MySQL database configuration
-        mysql_config = {
-            "host": "localhost",
-            "user": "root",
-            "password": "Srav@96*#97",
-            "database": "Employee"
-        }
+    st.write(" **Query for the above text:** :sunglasses:\n \n",response)
+    # Define MySQL database configuration
+    mysql_config = {
+        "host": "localhost",
+        "user": "root",
+        "password": "Srav@96*#97",
+        "database": "Employee"
+    }
 
-        response_df = read_sql_query(response, mysql_config)
-        st.subheader("Result")
+    response_df = read_sql_query(response, mysql_config)
+    st.subheader("Result")
 
+    # Check if response_df is not None before performing operations
+    if response_df is not None:
         # Display the result as a table with custom column names
         st.table(response_df.rename(columns={"id": "Employee ID", "name": "Employee Name", "gender": "Gender", "salary": "Salary", "department": "Department"}))
+    else:
+        st.warning("No data returned from the SQL query.")
