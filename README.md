@@ -1,4 +1,4 @@
-# SQL Query Retrieval App 🚀
+# SQL Query and Data Retrieval App 🚀
  - Welcome to the Gemini SQL Query Retrieval App! This Streamlit-powered application utilizes Google's Gemini AI to convert English questions into SQL queries and retrieve data from a MySQL database.
 
 ## How It Works
