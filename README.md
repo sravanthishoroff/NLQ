@@ -11,7 +11,7 @@ Clone the Repository:
 
 ```bash
 git clone https://github.com/sravanthishoroff/NLQ.git
-cd gemini-sql-query-retrieval
+```
 
 Setup Environment:
 
